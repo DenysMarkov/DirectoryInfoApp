@@ -16,11 +16,6 @@ namespace DirectoryInfoApp.BL.Services
             _jsonSerializerOptions = jsonSerializerOptions;
         }
 
-        /// <summary>
-        /// Serializes the directory information into JSON format.
-        /// </summary>
-        /// <param name="directory">The directory model to serialize.</param>
-        /// <returns>A JSON string representing the directory information.</returns>
         public string SerializeDirectory(IDirectoryInfoModel directory)
         {
             try
@@ -33,11 +28,6 @@ namespace DirectoryInfoApp.BL.Services
             }
         }
 
-        /// <summary>
-        /// Deserializes a JSON string back into a directory model.
-        /// </summary>
-        /// <param name="json">The JSON string representing the directory information.</param>
-        /// <returns>The deserialized directory model.</returns>
         public IDirectoryInfoModel DeserializeDirectory(string json)
         {
             try
@@ -50,11 +40,6 @@ namespace DirectoryInfoApp.BL.Services
             }
         }
 
-        /// <summary>
-        /// Saves the serialized JSON string to a file.
-        /// </summary>
-        /// <param name="path">The file path to save the JSON string.</param>
-        /// <param name="json">The JSON string to save.</param>
         public void SaveJsonToFile(string path, string json)
         {
             try
@@ -67,11 +52,6 @@ namespace DirectoryInfoApp.BL.Services
             }
         }
 
-        /// <summary>
-        /// Loads a JSON string from a file.
-        /// </summary>
-        /// <param name="path">The file path to load the JSON string from.</param>
-        /// <returns>The loaded JSON string.</returns>
         public string LoadJsonFromFile(string path)
         {
             if (!File.Exists(path))

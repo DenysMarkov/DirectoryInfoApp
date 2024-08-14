@@ -17,12 +17,6 @@ namespace DirectoryInfoApp.BL.Services
 
         public DirectoryInfoModel LoadDirectory(string path)
         {
-            // Validate the path
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentNullException("Invalid path.");
-            }
-
             // Get the directory information using the provider
             var directoryInfo = _directoryInfoProvider.GetDirectoryInfo(path);
 
@@ -32,7 +26,8 @@ namespace DirectoryInfoApp.BL.Services
             // Add files to directory model
             foreach (var file in _directoryInfoProvider.GetFiles(directoryInfo))
             {
-                directoryModel.Files.Add(new FileInfoModel(file.Name, file.Extension));
+                var fileInfoModel = new FileInfoModel(file.Name, file.Extension);
+                directoryModel.Files.Add(fileInfoModel);
             }
 
             // Add nested directories to directory model

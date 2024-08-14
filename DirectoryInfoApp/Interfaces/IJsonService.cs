@@ -10,6 +10,7 @@
         /// </summary>
         /// <param name="directory">The directory model to serialize.</param>
         /// <returns>A JSON string representing the directory information.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         string SerializeDirectory(IDirectoryInfoModel directory);
 
         /// <summary>
@@ -17,6 +18,7 @@
         /// </summary>
         /// <param name="json">The JSON string representing the directory information.</param>
         /// <returns>The deserialized directory model.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
         IDirectoryInfoModel DeserializeDirectory(string json);
 
         /// <summary>
@@ -24,6 +26,7 @@
         /// </summary>
         /// <param name="path">The file path to save the JSON string.</param>
         /// <param name="json">The JSON string to save.</param>
+        /// <exception cref="IOException"></exception>
         void SaveJsonToFile(string path, string json);
 
         /// <summary>
@@ -31,6 +34,8 @@
         /// </summary>
         /// <param name="path">The file path to load the JSON string from.</param>
         /// <returns>The loaded JSON string.</returns>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="IOException"></exception>
         string LoadJsonFromFile(string path);
     }
 }

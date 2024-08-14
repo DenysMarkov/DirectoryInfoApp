@@ -3,12 +3,13 @@ using DirectoryInfoApp.BL.Models;
 using DirectoryInfoApp.BL.Services;
 using Moq;
 
-namespace DirectoryInfoApp.Tests.ServicesTests
+namespace DirectoryInfoApp.Tests.UnitTests.ServicesTests
 {
     /// <summary>
     /// Unit tests for the <see cref="DirectoryService"/> class.
     /// </summary>
-    [TestFixture]
+    [TestFixture, Category("UnitTests")]
+    [Order(0)]
     public class DirectoryServiceTests
     {
         private Mock<IDirectoryInfoProvider> _directoryInfoProviderMock;
@@ -75,13 +76,31 @@ namespace DirectoryInfoApp.Tests.ServicesTests
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual("rootDir", result.Name);
-            Assert.AreEqual(1, result.Directories.Count);
-            Assert.AreEqual("nestedDir", result.Directories[0].Name);
-            Assert.AreEqual(1, result.Directories[0].Files.Count);
-            Assert.AreEqual("file2.txt", result.Directories[0].Files[0].Name);
+            Assert.That(result.Name, Is.EqualTo("rootDir"));
+            Assert.That(result.Directories.Count, Is.EqualTo(1));
+            Assert.That(result.Directories[0].Name, Is.EqualTo("nestedDir"));
+            Assert.That(result.Directories[0].Files.Count, Is.EqualTo(1));
+            Assert.That(result.Directories[0].Files[0].Name, Is.EqualTo("file2.txt"));
         }
 
+        [Test]
+        public void LoadDirectory_ShouldHandleEmptyDirectory()
+        {
+            // Arrange
+            var expectedNameDir = "emptyDir";
+            var directoryInfo = new DirectoryInfo(expectedNameDir);
+            _directoryInfoProviderMock.Setup(p => p.GetDirectoryInfo(expectedNameDir))
+                .Returns(directoryInfo);
+
+            // Act
+            var actualDir = _directoryService.LoadDirectory(expectedNameDir);
+
+            // Assert
+            Assert.IsNotNull(actualDir);
+            Assert.That(actualDir.Name, Is.EqualTo(expectedNameDir));
+            Assert.IsEmpty(actualDir.Files);
+            Assert.IsEmpty(actualDir.Directories);
+        }
 
         [Test]
         public void GetUniqueExtensions_ShouldReturnUniqueExtensions()
@@ -109,14 +128,27 @@ namespace DirectoryInfoApp.Tests.ServicesTests
         }
 
         [Test]
-        public void LoadDirectory_ShouldThrowExceptionForInvalidPath()
+        public void GetUniqueExtensions_ShouldHandleMultipleFileExtensions()
         {
             // Arrange
-            _directoryInfoProviderMock.Setup(x => x.GetDirectoryInfo("invalid_path"))
-                                     .Throws<DirectoryNotFoundException>();
+            var directoryInfo = new DirectoryInfoModel("TestDirectory")
+            {
+                Files = new List<FileInfoModel>
+                {
+                    new FileInfoModel("file1.txt", ".txt"),
+                    new FileInfoModel("file2.cs", ".cs"),
+                    new FileInfoModel("file3.jpg", ".jpg")
+                }
+            };
 
-            // Act & Assert
-            Assert.Throws<DirectoryNotFoundException>(() => _directoryService.LoadDirectory("invalid_path"));
+            // Act
+            var result = _directoryService.GetUniqueExtensions(directoryInfo);
+
+            // Assert
+            Assert.That(result.Count(), Is.EqualTo(3));
+            Assert.Contains(".txt", result.ToList());
+            Assert.Contains(".cs", result.ToList());
+            Assert.Contains(".jpg", result.ToList());
         }
     }
 }

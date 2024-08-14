@@ -4,12 +4,13 @@ using DirectoryInfoApp.BL.Services;
 using Moq;
 using System.Text.Json;
 
-namespace DirectoryInfoApp.Tests.ServicesTests
+namespace DirectoryInfoApp.Tests.UnitTests.ServicesTests
 {
     /// <summary>
     /// Unit tests for the <see cref="JsonService"/> class.
     /// </summary>
-    [TestFixture]
+    [TestFixture, Category("UnitTests")]
+    [Order(0)]
     public class JsonServiceTests
     {
         private IJsonService _jsonService;
@@ -96,6 +97,16 @@ namespace DirectoryInfoApp.Tests.ServicesTests
 
             // Cleanup
             File.Delete(filePath);
+        }
+
+        [Test]
+        public void LoadJsonFromFile_ShouldThrowFileNotFoundExceptionForNonExistentFile()
+        {
+            // Arrange
+            var filePath = "non_existent_file.json";
+
+            // Act & Assert
+            Assert.Throws<FileNotFoundException>(() => _jsonService.LoadJsonFromFile(filePath));
         }
 
         [Test]

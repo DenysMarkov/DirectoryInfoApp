@@ -2,38 +2,57 @@
 using DirectoryInfoApp.BL.Interfaces;
 using DirectoryInfoApp.BL.Providers;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 
-// Configure JSON serializer options
-var jsonOptions = new JsonSerializerOptions
-{
-    WriteIndented = true // Pretty print JSON
-};
+// Setup DI
+var serviceProvider = new ServiceCollection()
+    .AddSingleton<JsonSerializerOptions>(options =>
+    {
+        return new JsonSerializerOptions
+        {
+            WriteIndented = true,
+        };
+    })
+    .AddSingleton<IDirectoryInfoProvider, DirectoryInfoProvider>()
+    .AddSingleton<IDirectoryService, DirectoryService>()
+    .AddSingleton<IJsonService, JsonService>()
+    .BuildServiceProvider();
 
-IDirectoryService directoryService = new DirectoryService(new DirectoryInfoProvider());
-IJsonService jsonService = new JsonService(jsonOptions);
+// Get services
+var directoryService = serviceProvider.GetRequiredService<IDirectoryService>();
+var jsonService = serviceProvider.GetRequiredService<IJsonService>();
 
+// Input directory path
 Console.WriteLine("Input path to directory:");
 var directoryPath = Console.ReadLine();
 
-var directoryInfo = directoryService.LoadDirectory(directoryPath);
-
-// Print all unique file extensions
-var extensions = directoryService.GetUniqueExtensions(directoryInfo);
-Console.WriteLine("Unique file extensions:");
-foreach (var ext in extensions)
+try
 {
-    Console.WriteLine(ext);
+    // Load directory info
+    var directoryInfo = directoryService.LoadDirectory(directoryPath);
+
+    // Print unique extensions
+    var uniqueExtensions = directoryService.GetUniqueExtensions(directoryInfo);
+    Console.WriteLine("Unique file extensions:");
+    foreach (var ext in uniqueExtensions)
+    {
+        Console.WriteLine(ext);
+    }
+
+    // Serialize to JSON and save to file
+    var json = jsonService.SerializeDirectory(directoryInfo);
+    Console.WriteLine("\nSerialized JSON:");
+    Console.WriteLine(json);
+    jsonService.SaveJsonToFile("directoryInfo.json", json);
+
+    // Deserialize JSON from file
+    var loadedJson = jsonService.LoadJsonFromFile("directoryInfo.json");
+    var deserializedDirectoryInfo = jsonService.DeserializeDirectory(loadedJson);
+    Console.WriteLine("\nDeserialized Directory Information:");
+    Console.WriteLine("Deserialized directory name: " + deserializedDirectoryInfo.Name);
+    Console.WriteLine("Directory information successfully serialized and deserialized.");
 }
-
-// Serialize to JSON
-var json = jsonService.SerializeDirectory(directoryInfo);
-Console.WriteLine("\nSerialized JSON:");
-Console.WriteLine(json);
-
-jsonService.SaveJsonToFile("directory_info.json", json);
-
-// Deserialize JSON
-var loadedJson = jsonService.LoadJsonFromFile("directory_info.json");
-var deserializedDirectoryInfo = jsonService.DeserializeDirectory(loadedJson);
-Console.WriteLine("\nDeserialized Directory Information:");
-Console.WriteLine("Deserialized directory name: " + deserializedDirectoryInfo.Name);
+catch (Exception ex)
+{
+    Console.WriteLine($"Error: {ex.Message}");
+}

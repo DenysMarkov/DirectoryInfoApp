@@ -9,10 +9,15 @@ namespace DirectoryInfoApp.BL.Providers
     {
         public DirectoryInfo GetDirectoryInfo(string path)
         {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentNullException("Invalid path.");
+            }
             if (!Directory.Exists(path))
             {
                 throw new DirectoryNotFoundException($"Directory not found: {path}");
             }
+
             return new DirectoryInfo(path);
         }
 
